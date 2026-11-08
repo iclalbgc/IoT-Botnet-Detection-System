@@ -1,0 +1,88 @@
+{
+    "project_name": "IoT Botnet Detection with N-BaIoT Dataset",
+    "target_device": "SimpleHome_XCS7_1003_WHT_Security_Camera",
+    "dataset": "N-BaIoT (Benign vs Mirai Attack)",
+    "machine_learning_performance": [
+        {
+            "Model": "Random Forest",
+            "Accuracy": 1.0,
+            "Precision": 1.0,
+            "Recall": 1.0,
+            "F1-Score": 1.0
+        },
+        {
+            "Model": "Decision Tree",
+            "Accuracy": 1.0,
+            "Precision": 1.0,
+            "Recall": 1.0,
+            "F1-Score": 1.0
+        },
+        {
+            "Model": "KNN",
+            "Accuracy": 0.9905,
+            "Precision": 0.983051,
+            "Recall": 0.997976,
+            "F1-Score": 0.990457
+        },
+        {   "Model": "Logistic Regression",
+            "Accuracy": 0.2093,
+            "Precision": 0.2092,
+            "Recall": 1.0,
+            "F1-Score": 0.3461
+        }
+    ],
+    "random_forest_top_features": [
+        {
+            "rank": 1,
+            "column_index": 14,
+            "importance_score": 0.1141
+        },
+        {
+            "rank": 2,
+            "column_index": 27,
+            "importance_score": 0.0908
+        },
+        {
+            "rank": 3,
+            "column_index": 28,
+            "importance_score": 0.0801
+        }
+    ],
+    "statistical_models": {
+        "z_score_analysis": {
+            "total_packets_analyzed": 6000,
+            "detected_anomalies_count": 461,
+            "threshold": "abs(z) > 3",
+            "label_validation": {
+                "normal_records": 3000,
+                "attack_records": 3000,
+                "true_positive": 57,
+                "false_positive": 404,
+                "false_negative": 2943,
+                "true_negative": 2596
+            }
+        },
+        "anova_feature_selection": [
+            {
+                "rank": 1,
+                "column_index": 9,
+                "f_score": 363942.3
+            },
+            {
+                "rank": 2,
+                "column_index": 24,
+                "f_score": 363942.28
+            },
+            {
+                "rank": 3,
+                "column_index": 29,
+                "f_score": 355541.3
+            }
+        ]
+    },
+  "evaluation": {
+        "test_edilen_kayit_sayisi": "4.000 adet kayıt (Toplam 20.000 veri üzerinden)",
+        "egitim_test_ayirma_orani": "%80 Eğitim - %20 Test (train_test_split)",
+        "test_yontemi": "Hold-out (Rastgele Ayrım - random_state=42)"
+    }
+}

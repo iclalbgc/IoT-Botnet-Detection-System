@@ -1,0 +1,85 @@
+# LLM Çalışma Mimarisi ve Doğrulama Raporu
+
+LLM Çalışma Ortamı: Ollama (Lokal API)
+Model Adı: qwen2.5
+Model Sürümü: 7b
+LLM'in Projedeki Konumu: Ham bir saldırı tespit motoru değil; "Otomatik Güvenlik Raporlama ve Metin Sentezleme Modülü" olarak konumlandırılmış yardımcı bileşen.
+LLM'e Verilen Girdi: Model başarı metrikleri (RF, DT, KNN, LR), Z-Score anomali tablosu ve ANOVA / Random Forest özellik önem skorları.
+Kullanılan Prompt: "Aşağıdaki IoT botnet tespit verilerini, model başarı metriklerini ve istatistiksel Z-Score anomali sonuçlarını akademik ve teknik bir dille analiz et. Metriklerin sınırlarını, yanlış alarm oranlarını ve güvenlik önerilerini gerekçelendirerek Türkçe olarak raporla."
+
+# Tehdit Durum Değerlendirmesi
+
+Proje: IoT Botnet Detection with N-BaIoT Dataset
+
+Cihaz türü: SimpleHome_XCS7_1003_WHT_Security_Camera
+
+Veri kümesi: N-BaIoT (Benign vs Mirai Attack)
+
+Ek deney bilgileri: test_edilen_kayit_sayisi: 4.000 adet kayıt (Toplam 20.000 veri üzerinden); egitim_test_ayirma_orani: %80 Eğitim - %20 Test (train_test_split); test_yontemi: Hold-out (Rastgele Ayrım - random_state=42)
+
+**Model sonuçları**
+
+| Model | Kapsam | Doğruluk | Kesinlik | Duyarlılık | F1 skoru |
+| --- | --- | --- | --- | --- | --- |
+| Decision Tree | Proje modeli | %100,0000 | %100,0000 | %100,0000 | %100,0000 |
+| Random Forest | Proje modeli | %100,0000 | %100,0000 | %100,0000 | %100,0000 |
+| KNN | Proje modeli | %99,0500 | %98,3051 | %99,7976 | %99,0457 |
+| Logistic Regression | Ek deney | %20,9300 | %20,9200 | %100,0000 | %34,6100 |
+
+JSON'daki dört metriği aynı olan modeller: Random Forest, Decision Tree.
+
+**Random Forest özellik önemleri**
+
+| Sütun numarası | Özellik adı | Önem skoru |
+| --- | --- | --- |
+| 14 | Özellik adı verilmedi | 0,1141 |
+| 27 | Özellik adı verilmedi | 0,0908 |
+| 28 | Özellik adı verilmedi | 0,0801 |
+
+**ANOVA özellik analizi**
+
+| Sütun numarası | Özellik adı | F skoru |
+| --- | --- | --- |
+| 9 | Özellik adı verilmedi | 363.942,30 |
+| 24 | Özellik adı verilmedi | 363.942,28 |
+| 29 | Özellik adı verilmedi | 355.541,30 |
+
+Random Forest önemleri modelin özelliklere verdiği göreli önemi gösterir; saldırı olasılığı veya başarı oranı değildir. ANOVA F skoru gruplar arası değişkenliği grup içi değişkenliğe göre değerlendirir; yüzde değildir. P değerleri ve test varsayımları verilmediğinden kesin anlamlılık iddiası kurulmaz. Özellik adı sağlanmayan sütunların trafik anlamı tahmin edilmez.
+
+**Yerel LLM değerlendirmesi:**
+
+Proje, IoT kamera ağ trafiğinde normal kayıtlarla botnet saldırıları ayırt etmeye odaklanmaktadır. Bu amaçla, Decision Tree, Random Forest, KNN ve Logistic Regression modelleri kullanılmıştır. Model sonuçları, her modelin dört metriği (Doğruluk, Kesinlik, Duyarlılık, F1 Skoru) karşılaştırılmıştır. Decision Tree ve Random Forest modelleri, her metriği %100 puanla başarıyla sınıflandırmışlardır, ancak KNN modeli %99.0500 doğruluk puanıyla en düşük performans göstermiştir. Logistic Regression, ek deneyde %20.9300 doğruluk puanıyla en düşük performans göstermiştir. Bu sonuçlar, modelin sınıflandırma performansını ve potansiyel yanlış alarm oranlarını belirleyen kritik faktörleri vurgulamaktadır.
+
+# Tespit Edilen Anomali Özeti
+
+| Ölçüt | Değer |
+| --- | --- |
+| İncelenen kayıt | 6.000 |
+| Anomali eşiği | abs(z) > 3 |
+| Anomali işaretlenen kayıt | 461 |
+| Anomali oranı | %7,68 |
+| Etiketi normal olan kayıt | 3.000 |
+| Etiketi saldırı olan kayıt | 3.000 |
+| Doğru yakalanan saldırı (TP) | 57 |
+| Yanlış alarm (FP) | 404 |
+| Kaçırılan saldırı (FN) | 2.943 |
+| Doğru normal (TN) | 2.596 |
+| Anomali uyarılarının kesinliği | %12,36 |
+| Saldırı yakalama oranı | %1,90 |
+| Yanlış alarm oranı | %13,47 |
+
+Bu değerlendirme ML model karşılaştırmasından ayrıdır. Z-Score uyarısı tek başına doğrulanmış saldırı değildir.
+
+Oranlar verilen sayılardan hesaplandı; ham trafik kayıtları yeniden işlenmedi.
+
+**Yerel LLM değerlendirmesi:**
+
+Z-Score analizi, 6.000 incelenen kayıtlardan 461 anomali olarak işaretlenmiş, bu oran %7.68'dir. Saldırılar etiketlenen 3.000 kayıttan %1.90'ya kadar yakalandı, yanlış alarmlar %13.47 oranında gerçekleşti. Bu değerlendirme, Z-Score uyarısı tek başına doğrulanmış bir saldırı değildir ve oranlar verilen sayılardan hesaplandı. Anomali uyarılarının kesinliği %12.36 olarak belirlenmiştir. Bu sonuçlar, modelin sınıflandırma performansını ve potansiyel yanlış alarm oranlarını belirleyen kritik faktörleri vurgulamaktadır.
+
+# Önerilen Güvenlik Aksiyonları
+
+Bulunduğumuz durumda, aşağıdaki dört güvenlik önerisi sunulabilir:
+1. Model başarısının en yüksek olduğu Decision Tree ve Random Forest modellerini kullanarak botnet tespiti için daha hassas ve doğru bir yaklaşım geliştirebiliriz.
+2. Z-Score analizinde kullanılan eşik değerlerini optimize etmek için daha fazla veri ve farklı eşik değerleri test etmek önemlidir.
+3. Logistic Regression modelinin düşük performansı nedenini incelemek ve potansiyel olarak daha iyi özellikler seçimi veya model ayarları yapmak gereklidir.
+4. Sınıflandırma performansını ve potansiyel yanlış alarm oranlarını iyileştirmek için yeni veri setleri ve farklı model ayarları kullanarak modelin performansını sürekli olarak test etmek önemlidir.
